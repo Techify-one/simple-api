@@ -412,36 +412,45 @@ const mountRoutes = (router, prefix = '') => {
     // Add UUID redirect middleware
     router.use(prefix, uuidRedirectMiddleware);
     
-    // API routes - RESTful style without action suffixes
-    router.post(`${prefix}/:uuid?`, authenticateToken, handlers.create);
-    router.get(`${prefix}/:uuid?`, authenticateToken, handlers.read);
-    router.put(`${prefix}/:uuid?/:id`, authenticateToken, handlers.update);
-    router.delete(`${prefix}/:uuid?/:id`, authenticateToken, handlers.delete);
-    
-    // Serve static files
+    // Serve static files FIRST (before API routes)
     router.use(prefix, express.static(path.join(APP_DIR, 'public')));
     
-    // View routes
+    // View routes (before API routes to avoid conflicts)
     router.get(`${prefix}/:uuid?/view`, (req, res) => {
         res.sendFile(path.join(APP_DIR, 'public', 'index.html'));
     });
     
-    // UUID route - serve index.html for UUID path
-    router.get(`${prefix}/:uuid`, (req, res) => {
-        // Check if the parameter is a valid UUID
+    // UUID route - serve index.html for UUID path (check if it's a view request)
+    router.get(`${prefix}/:uuid`, (req, res, next) => {
         const uuid = req.params.uuid;
-        if (uuid.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i)) {
+        // If it's a valid UUID and no authorization header (browser request), serve HTML
+        if (uuid.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i) && !req.headers.authorization) {
             res.sendFile(path.join(APP_DIR, 'public', 'index.html'));
+        } else if (req.headers.authorization) {
+            // If it has authorization header, pass to API routes
+            next();
         } else {
             res.status(404).send('Not found');
         }
     });
     
-    // Root redirect
-    router.get(prefix, (req, res) => {
-        const uuid = getOrCreateUuid(req, res);
-        res.redirect(`${prefix}/${uuid}/view`);
+    // Root redirect (before API routes)
+    router.get(prefix || '/', (req, res, next) => {
+        // If no authorization header, redirect to view
+        if (!req.headers.authorization) {
+            const uuid = getOrCreateUuid(req, res);
+            res.redirect(`${prefix}/${uuid}/view`);
+        } else {
+            // If authorization header exists, pass to API routes
+            next();
+        }
     });
+    
+    // API routes - RESTful style without action suffixes (AFTER view routes)
+    router.post(`${prefix}/:uuid?`, authenticateToken, handlers.create);
+    router.get(`${prefix}/:uuid?`, authenticateToken, handlers.read);
+    router.put(`${prefix}/:uuid?/:id`, authenticateToken, handlers.update);
+    router.delete(`${prefix}/:uuid?/:id`, authenticateToken, handlers.delete);
 };
 
 // Mount routes for all paths

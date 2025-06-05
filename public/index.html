@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple API by Techify</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="header-content">
+                <div class="header-left">
+                    <div class="title-container">
+                        <h1>Simple API by Techify</h1>
+                    </div>
+                </div>
+                <div class="header-center">
+                    <div id="lastChangeInline" class="last-change-inline"></div>
+                </div>
+                <div class="header-right">
+                    <div id="clock" class="clock"></div>
+                    <button id="toggleExamples" class="toggle-examples-btn">
+                        <i class="fas fa-code"></i> API Examples
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <div id="examplesContainer" class="examples-container">
+            <div class="examples-header">
+                <h2>CRUD API Examples</h2>
+                <p class="examples-description">Use these commands to test the API with your current UUID.</p>
+            </div>
+            
+            <div class="examples-content">
+                <div class="example-tabs">
+                    <button class="tab-btn active" data-tab="create">CREATE</button>
+                    <button class="tab-btn" data-tab="read">READ</button>
+                    <button class="tab-btn" data-tab="update">UPDATE</button>
+                    <button class="tab-btn" data-tab="delete">DELETE</button>
+                </div>
+                
+                <div class="example-content">
+                    <div class="tab-content active" id="create-content">
+                        <div class="code-block">
+                            <pre id="createExample"></pre>
+                            <button class="copy-btn" data-target="createExample">
+                                <i class="fas fa-copy"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="tab-content" id="read-content">
+                        <div class="code-block">
+                            <h3>Get all records</h3>
+                            <pre id="readAllExample"></pre>
+                            <button class="copy-btn" data-target="readAllExample">
+                                <i class="fas fa-copy"></i>
+                            </button>
+                        </div>
+                        <div class="code-block">
+                            <h3>Filter by ID</h3>
+                            <pre id="readByIdExample"></pre>
+                            <button class="copy-btn" data-target="readByIdExample">
+                                <i class="fas fa-copy"></i>
+                            </button>
+                        </div>
+                        <div class="code-block">
+                            <h3>Filter by name</h3>
+                            <pre id="readByNameExample"></pre>
+                            <button class="copy-btn" data-target="readByNameExample">
+                                <i class="fas fa-copy"></i>
+                            </button>
+                        </div>
+                        <div class="code-block">
+                            <h3>Filter by profession</h3>
+                            <pre id="readByProfessionExample"></pre>
+                            <button class="copy-btn" data-target="readByProfessionExample">
+                                <i class="fas fa-copy"></i>
+                            </button>
+                        </div>
+                        <div class="code-block">
+                            <h3>Combine multiple filters</h3>
+                            <pre id="readCombinedExample"></pre>
+                            <button class="copy-btn" data-target="readCombinedExample">
+                                <i class="fas fa-copy"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="tab-content" id="update-content">
+                        <div class="code-block">
+                            <pre id="updateExample"></pre>
+                            <button class="copy-btn" data-target="updateExample">
+                                <i class="fas fa-copy"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="tab-content" id="delete-content">
+                        <div class="code-block">
+                            <pre id="deleteExample"></pre>
+                            <button class="copy-btn" data-target="deleteExample">
+                                <i class="fas fa-copy"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="data-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Name</th>
+                        <th>Occupation</th>
+                        <th>Creation Date</th>
+                        <th>Last Change</th>
+                    </tr>
+                </thead>
+                <tbody id="registrosTabela">
+                    <!-- Dados serão inseridos aqui dinamicamente -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>

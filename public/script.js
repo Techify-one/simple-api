@@ -125,8 +125,16 @@ function getUuidFromUrl() {
 // Carregar dados iniciais
 async function loadInitialData() {
     try {
-        // Use a GET request to the base path with UUID
-        const response = await fetch('.', {
+        // Get the API path by removing /view from current path
+        const uuid = getUuidFromUrl();
+        const pathPrefix = window.location.pathname.includes('/proxy/3006') ? '/proxy/3006' : 
+                          window.location.pathname.includes('/proxy/3007') ? '/proxy/3007' : '';
+        const apiPath = uuid ? `${pathPrefix}/${uuid}` : pathPrefix || '/';
+        
+        console.log('Loading data from API path:', apiPath);
+        console.log('Current location:', window.location.pathname);
+        
+        const response = await fetch(apiPath, {
             headers: {
                 'Authorization': 'Bearer uzJtmYh8DrCuAK5td3APLxvYds704hOslXZJd7a'
             }
@@ -136,7 +144,8 @@ async function loadInitialData() {
             const data = await response.json();
             updateTable(data);
         } else {
-            console.error('Erro ao carregar dados:', response.statusText);
+            console.error('Erro ao carregar dados:', response.status, response.statusText);
+            console.error('Failed URL:', apiPath);
         }
     } catch (error) {
         console.error('Erro ao carregar dados:', error);

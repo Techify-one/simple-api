@@ -456,6 +456,7 @@ const mountRoutes = (router, prefix = '') => {
 // Mount routes for all paths
 mountRoutes(app, '/proxy/3006');
 mountRoutes(app, '/proxy/3007');
+mountRoutes(app, '/simple-api');
 mountRoutes(app);
 
 const PORT = process.env.PORT || 3006;

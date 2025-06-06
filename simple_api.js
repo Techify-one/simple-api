@@ -377,10 +377,8 @@ const handlers = createCrudHandlers();
 
 // UUID redirect middleware
 const uuidRedirectMiddleware = (req, res, next) => {
-    // Skip for static files and API endpoints
-    if (req.path.includes('.') || req.path.includes('/create') || 
-        req.path.includes('/read') || req.path.includes('/update') || 
-        req.path.includes('/delete')) {
+    // Skip for static files, view routes, and API calls with Authorization header
+    if (req.path.includes('.') || req.path.includes('/view') || req.headers.authorization) {
         return next();
     }
     
@@ -406,33 +404,34 @@ const uuidRedirectMiddleware = (req, res, next) => {
 
 // Mount routes for both paths
 const mountRoutes = (router, prefix = '') => {
-    // Add UUID redirect middleware
+    // Add UUID redirect middleware only for root path
     router.use(prefix, uuidRedirectMiddleware);
-    
-    // API routes
-    router.post(`${prefix}/:uuid?/create`, authenticateToken, handlers.create);
-    router.get(`${prefix}/:uuid?/read`, authenticateToken, handlers.read);
-    router.put(`${prefix}/:uuid?/update/:id`, authenticateToken, handlers.update);
-    router.delete(`${prefix}/:uuid?/delete/:id`, authenticateToken, handlers.delete);
     
     // Serve static files
     router.use(prefix, express.static(path.join(APP_DIR, 'public')));
     
     // View routes
-    router.get(`${prefix}/:uuid?/view`, (req, res) => {
+    router.get(`${prefix}/:uuid/view`, (req, res) => {
         res.sendFile(path.join(APP_DIR, 'public', 'index.html'));
     });
     
-    // UUID route - serve index.html for UUID path
-    router.get(`${prefix}/:uuid`, (req, res) => {
-        // Check if the parameter is a valid UUID
+    // REST API routes with authentication
+    router.post(`${prefix}/:uuid`, authenticateToken, handlers.create);
+    router.get(`${prefix}/:uuid`, (req, res, next) => {
+        // If it has authorization header, treat as API call
+        if (req.headers.authorization) {
+            return authenticateToken(req, res, () => handlers.read(req, res));
+        }
+        // Otherwise, check if it's a valid UUID and serve the interface
         const uuid = req.params.uuid;
-        if (uuid.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i)) {
+        if (uuid && uuid.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i)) {
             res.sendFile(path.join(APP_DIR, 'public', 'index.html'));
         } else {
             res.status(404).send('Not found');
         }
     });
+    router.put(`${prefix}/:uuid/:id`, authenticateToken, handlers.update);
+    router.delete(`${prefix}/:uuid/:id`, authenticateToken, handlers.delete);
     
     // Root redirect
     router.get(prefix, (req, res) => {

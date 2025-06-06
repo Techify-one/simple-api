@@ -127,7 +127,7 @@ async function loadInitialData() {
     try {
         // Construir URL para a API com o UUID da URL atual
         const uuid = getUuidFromUrl();
-        const apiPath = uuid ? `read` : 'read';
+        const apiPath = uuid ? `.` : '.';
         
         const response = await fetch(apiPath, {
             headers: {
@@ -266,38 +266,38 @@ function generateExamples() {
   -H "Content-Type: application/json" \\
   -H "Authorization: ${authToken}" \\
   -d '{"name":"Example Name","profissao":"Example Job"}' \\
-  ${baseUrl}${pathPrefix}/${uuid}/create`;
+  ${baseUrl}${pathPrefix}/${uuid}`;
     
     // READ examples with separate copy buttons
     // Get all records
     document.getElementById('readAllExample').textContent = 
         `curl -X GET \\
   -H "Authorization: ${authToken}" \\
-  ${baseUrl}${pathPrefix}/${uuid}/read`;
+  ${baseUrl}${pathPrefix}/${uuid}`;
     
     // Filter by ID
     document.getElementById('readByIdExample').textContent = 
         `curl -X GET \\
   -H "Authorization: ${authToken}" \\
-  ${baseUrl}${pathPrefix}/${uuid}/read?id=1`;
+  ${baseUrl}${pathPrefix}/${uuid}?id=1`;
     
     // Filter by name
     document.getElementById('readByNameExample').textContent = 
         `curl -X GET \\
   -H "Authorization: ${authToken}" \\
-  ${baseUrl}${pathPrefix}/${uuid}/read?name=example`;
+  ${baseUrl}${pathPrefix}/${uuid}?name=example`;
     
     // Filter by profession
     document.getElementById('readByProfessionExample').textContent = 
         `curl -X GET \\
   -H "Authorization: ${authToken}" \\
-  ${baseUrl}${pathPrefix}/${uuid}/read?profissao=developer`;
+  ${baseUrl}${pathPrefix}/${uuid}?profissao=developer`;
     
     // Combine multiple filters
     document.getElementById('readCombinedExample').textContent = 
         `curl -X GET \\
   -H "Authorization: ${authToken}" \\
-  ${baseUrl}${pathPrefix}/${uuid}/read?name=john&profissao=developer`;
+  ${baseUrl}${pathPrefix}/${uuid}?name=john&profissao=developer`;
     
     // UPDATE example
     document.getElementById('updateExample').textContent = 
@@ -305,13 +305,13 @@ function generateExamples() {
   -H "Content-Type: application/json" \\
   -H "Authorization: ${authToken}" \\
   -d '{"name":"Updated Name","profissao":"Updated Job"}' \\
-  ${baseUrl}${pathPrefix}/${uuid}/update/1`;
+  ${baseUrl}${pathPrefix}/${uuid}/1`;
     
     // DELETE example
     document.getElementById('deleteExample').textContent = 
         `curl -X DELETE \\
   -H "Authorization: ${authToken}" \\
-  ${baseUrl}${pathPrefix}/${uuid}/delete/1`;
+  ${baseUrl}${pathPrefix}/${uuid}/1`;
 }
 
 // Inicializar quando a página carregar

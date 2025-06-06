@@ -74,13 +74,13 @@ Authorization: Bearer uzJtmYh8DrCuAK5td3APLxvYds704hOslXZJd7a
 // POST / (criar)
 {
   "name": "Exemplo Nome",
-  "profissao": "Exemplo Profissão"
+  "occupation": "Exemplo Profissão"
 }
 
 // PUT /:id (atualizar)
 {
   "name": "Nome editado",
-  "profissao": "Profissão editada"
+  "occupation": "Profissão editada"
 }
 ```
 
@@ -88,9 +88,9 @@ Authorization: Bearer uzJtmYh8DrCuAK5td3APLxvYds704hOslXZJd7a
 
 * `id` — igualdade exata (numero)
 * `name` — correspondência que **contém** (case‑insensitive)
-* `profissao` — correspondência que **contém** (case‑insensitive)
+* `occupation` — correspondência que **contém** (case‑insensitive)
 
-Exemplo: `GET /?profissao=Engenheiro&name=ana`
+Exemplo: `GET /?occupation=Engenheiro&name=ana`
 
 ---
 
@@ -105,17 +105,17 @@ BASE="http://localhost:3006/$UUID"
 curl -X POST "$BASE" \
   -H "Authorization: Bearer $TOKEN" \
   -H "Content-Type: application/json" \
-  -d '{"name":"Maria","profissao":"Desenvolvedora"}'
+  -d '{"name":"Maria","occupation":"Desenvolvedora"}'
 
 # Listar com filtros
-curl -X GET "$BASE?profissao=Desenvolvedora" \
+curl -X GET "$BASE?occupation=Desenvolvedora" \
   -H "Authorization: Bearer $TOKEN"
 
 # Atualizar
 curl -X PUT "$BASE/3" \
   -H "Authorization: Bearer $TOKEN" \
   -H "Content-Type: application/json" \
-  -d '{"name":"Maria A.","profissao":"Full‑Stack"}'
+  -d '{"name":"Maria A.","occupation":"Full‑Stack"}'
 
 # Deletar
 curl -X DELETE "$BASE/3" \

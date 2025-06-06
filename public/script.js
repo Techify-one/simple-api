@@ -93,7 +93,7 @@ function updateTable(data) {
         const rowContent = `
             <td>${record.id}</td>
             <td>${record.name}</td>
-            <td>${record.occupation}</td>
+            <td>${record.profissao}</td>
             <td>${formatDate(record.dataCriacao)}</td>
             <td>${formatDate(record.dataEdicao)}</td>
         `;
@@ -125,14 +125,9 @@ function getUuidFromUrl() {
 // Carregar dados iniciais
 async function loadInitialData() {
     try {
-        // Get the API path by removing /view from current path
+        // Construir URL para a API com o UUID da URL atual
         const uuid = getUuidFromUrl();
-        const pathPrefix = window.location.pathname.includes('/proxy/3006') ? '/proxy/3006' : 
-                          window.location.pathname.includes('/proxy/3007') ? '/proxy/3007' : '';
-        const apiPath = uuid ? `${pathPrefix}/${uuid}` : pathPrefix || '/';
-        
-        console.log('Loading data from API path:', apiPath);
-        console.log('Current location:', window.location.pathname);
+        const apiPath = uuid ? `read` : 'read';
         
         const response = await fetch(apiPath, {
             headers: {
@@ -144,8 +139,7 @@ async function loadInitialData() {
             const data = await response.json();
             updateTable(data);
         } else {
-            console.error('Erro ao carregar dados:', response.status, response.statusText);
-            console.error('Failed URL:', apiPath);
+            console.error('Erro ao carregar dados:', response.statusText);
         }
     } catch (error) {
         console.error('Erro ao carregar dados:', error);
@@ -253,64 +247,71 @@ function setupExamplesSection() {
 // Generate example commands
 function generateExamples() {
     const uuid = getUuidFromUrl() || 'default';
-    const baseUrl = `${window.location.protocol}//${window.location.host}${window.location.pathname.split('/').slice(0, -2).join('/')}`;
+    const baseUrl = `${window.location.protocol}//${window.location.host}`;
     const authToken = 'Bearer uzJtmYh8DrCuAK5td3APLxvYds704hOslXZJd7a';
     
     // Get the path prefix from the current URL
-    const pathPrefix = window.location.pathname.includes('/proxy/3006') ? '/proxy/3006' : '';
+    let pathPrefix = '';
+    if (window.location.pathname.includes('/simple-api')) {
+        pathPrefix = '/simple-api';
+    } else if (window.location.pathname.includes('/proxy/3006')) {
+        pathPrefix = '/proxy/3006';
+    } else if (window.location.pathname.includes('/proxy/3007')) {
+        pathPrefix = '/proxy/3007';
+    }
     
-    // CREATE example (POST)
+    // CREATE example
     document.getElementById('createExample').textContent = 
         `curl -X POST \\
   -H "Content-Type: application/json" \\
   -H "Authorization: ${authToken}" \\
-  -d '{"name":"Example Name","occupation":"Example Job"}' \\
-  ${baseUrl}${pathPrefix}/${uuid}`;
+  -d '{"name":"Example Name","profissao":"Example Job"}' \\
+  ${baseUrl}${pathPrefix}/${uuid}/create`;
     
-    // READ examples with separate copy buttons (GET)
+    // READ examples with separate copy buttons
     // Get all records
     document.getElementById('readAllExample').textContent = 
         `curl -X GET \\
   -H "Authorization: ${authToken}" \\
-  ${baseUrl}${pathPrefix}/${uuid}`;
+  ${baseUrl}${pathPrefix}/${uuid}/read`;
     
     // Filter by ID
     document.getElementById('readByIdExample').textContent = 
         `curl -X GET \\
   -H "Authorization: ${authToken}" \\
-  ${baseUrl}${pathPrefix}/${uuid}?id=1`;
+  ${baseUrl}${pathPrefix}/${uuid}/read?id=1`;
     
     // Filter by name
     document.getElementById('readByNameExample').textContent = 
         `curl -X GET \\
   -H "Authorization: ${authToken}" \\
-  ${baseUrl}${pathPrefix}/${uuid}?name=example`;
+  ${baseUrl}${pathPrefix}/${uuid}/read?name=example`;
     
     // Filter by profession
     document.getElementById('readByProfessionExample').textContent = 
         `curl -X GET \\
   -H "Authorization: ${authToken}" \\
-  ${baseUrl}${pathPrefix}/${uuid}?occupation=developer`;
+  ${baseUrl}${pathPrefix}/${uuid}/read?profissao=developer`;
     
     // Combine multiple filters
     document.getElementById('readCombinedExample').textContent = 
         `curl -X GET \\
   -H "Authorization: ${authToken}" \\
-  ${baseUrl}${pathPrefix}/${uuid}?name=john&occupation=developer`;
+  ${baseUrl}${pathPrefix}/${uuid}/read?name=john&profissao=developer`;
     
-    // UPDATE example (PUT)
+    // UPDATE example
     document.getElementById('updateExample').textContent = 
         `curl -X PUT \\
   -H "Content-Type: application/json" \\
   -H "Authorization: ${authToken}" \\
-  -d '{"name":"Updated Name","occupation":"Updated Job"}' \\
-  ${baseUrl}${pathPrefix}/${uuid}/1`;
+  -d '{"name":"Updated Name","profissao":"Updated Job"}' \\
+  ${baseUrl}${pathPrefix}/${uuid}/update/1`;
     
-    // DELETE example (DELETE)
+    // DELETE example
     document.getElementById('deleteExample').textContent = 
         `curl -X DELETE \\
   -H "Authorization: ${authToken}" \\
-  ${baseUrl}${pathPrefix}/${uuid}/1`;
+  ${baseUrl}${pathPrefix}/${uuid}/delete/1`;
 }
 
 // Inicializar quando a página carregar

@@ -172,7 +172,7 @@ server.on('upgrade', (request, socket, head) => {
             ws.uuid = uuid;
             wss.emit('connection', ws, request);
         });
-    } else if (pathname === '/proxy/3006' || pathname === '/proxy/3007' || pathname === '/') {
+    } else if (pathname === '/simple-api' || pathname === '/proxy/3006' || pathname === '/proxy/3007' || pathname === '/') {
         // Legacy path handling (should redirect in HTTP layer)
         wss.handleUpgrade(request, socket, head, (ws) => {
             wss.emit('connection', ws, request);
@@ -234,8 +234,8 @@ function extractUuidFromUrl(req) {
 const createCrudHandlers = () => ({
     create: async (req, res) => {
         try {
-            const { name, occupation } = req.body;
-            if (!name || !occupation) {
+            const { name, profissao } = req.body;
+            if (!name || !profissao) {
                 return res.status(400).json({ error: 'Name e occupation são obrigatórios' });
             }
 
@@ -250,7 +250,7 @@ const createCrudHandlers = () => ({
             const newRecord = {
                 id: newId,
                 name,
-                occupation,
+                profissao,
                 dataCriacao: now,
                 dataEdicao: now
             };
@@ -274,7 +274,7 @@ const createCrudHandlers = () => ({
             const urlUuid = extractUuidFromUrl(req);
             const uuid = urlUuid || getOrCreateUuid(req, res);
             
-            const { id, name, occupation } = req.query;
+            const { id, name, profissao } = req.query;
             let data = await readUserData(uuid);
             
             // Aplicar filtros se fornecidos
@@ -289,10 +289,10 @@ const createCrudHandlers = () => ({
                 );
             }
             
-            if (occupation) {
-                const occupationLowerCase = occupation.toLowerCase();
+            if (profissao) {
+                const profissaoLowerCase = profissao.toLowerCase();
                 data = data.filter(record => 
-                    record.occupation.toLowerCase().includes(occupationLowerCase)
+                    record.profissao.toLowerCase().includes(profissaoLowerCase)
                 );
             }
             
@@ -306,9 +306,9 @@ const createCrudHandlers = () => ({
     update: async (req, res) => {
         try {
             const { id } = req.params;
-            const { name, occupation } = req.body;
+            const { name, profissao } = req.body;
             
-            if (!name || !occupation) {
+            if (!name || !profissao) {
                 return res.status(400).json({ error: 'Name e occupation são obrigatórios' });
             }
 
@@ -327,7 +327,7 @@ const createCrudHandlers = () => ({
             data[index] = {
                 ...data[index],
                 name,
-                occupation,
+                profissao,
                 dataEdicao: now
             };
 
@@ -377,13 +377,10 @@ const handlers = createCrudHandlers();
 
 // UUID redirect middleware
 const uuidRedirectMiddleware = (req, res, next) => {
-    // Skip for static files
-    if (req.path.includes('.')) {
-        return next();
-    }
-    
-    // Skip for API calls with authentication (they handle UUID differently)
-    if (req.headers.authorization) {
+    // Skip for static files and API endpoints
+    if (req.path.includes('.') || req.path.includes('/create') || 
+        req.path.includes('/read') || req.path.includes('/update') || 
+        req.path.includes('/delete')) {
         return next();
     }
     
@@ -412,51 +409,42 @@ const mountRoutes = (router, prefix = '') => {
     // Add UUID redirect middleware
     router.use(prefix, uuidRedirectMiddleware);
     
-    // Serve static files FIRST (before API routes)
+    // API routes
+    router.post(`${prefix}/:uuid?/create`, authenticateToken, handlers.create);
+    router.get(`${prefix}/:uuid?/read`, authenticateToken, handlers.read);
+    router.put(`${prefix}/:uuid?/update/:id`, authenticateToken, handlers.update);
+    router.delete(`${prefix}/:uuid?/delete/:id`, authenticateToken, handlers.delete);
+    
+    // Serve static files
     router.use(prefix, express.static(path.join(APP_DIR, 'public')));
     
-    // View routes (before API routes to avoid conflicts)
+    // View routes
     router.get(`${prefix}/:uuid?/view`, (req, res) => {
         res.sendFile(path.join(APP_DIR, 'public', 'index.html'));
     });
     
-    // UUID route - serve index.html for UUID path (check if it's a view request)
-    router.get(`${prefix}/:uuid`, (req, res, next) => {
+    // UUID route - serve index.html for UUID path
+    router.get(`${prefix}/:uuid`, (req, res) => {
+        // Check if the parameter is a valid UUID
         const uuid = req.params.uuid;
-        // If it's a valid UUID and no authorization header (browser request), serve HTML
-        if (uuid.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i) && !req.headers.authorization) {
+        if (uuid.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i)) {
             res.sendFile(path.join(APP_DIR, 'public', 'index.html'));
-        } else if (req.headers.authorization) {
-            // If it has authorization header, pass to API routes
-            next();
         } else {
             res.status(404).send('Not found');
         }
     });
     
-    // Root redirect (before API routes)
-    router.get(prefix || '/', (req, res, next) => {
-        // If no authorization header, redirect to view
-        if (!req.headers.authorization) {
-            const uuid = getOrCreateUuid(req, res);
-            res.redirect(`${prefix}/${uuid}/view`);
-        } else {
-            // If authorization header exists, pass to API routes
-            next();
-        }
+    // Root redirect
+    router.get(prefix, (req, res) => {
+        const uuid = getOrCreateUuid(req, res);
+        res.redirect(`${prefix}/${uuid}/view`);
     });
-    
-    // API routes - RESTful style without action suffixes (AFTER view routes)
-    router.post(`${prefix}/:uuid?`, authenticateToken, handlers.create);
-    router.get(`${prefix}/:uuid?`, authenticateToken, handlers.read);
-    router.put(`${prefix}/:uuid?/:id`, authenticateToken, handlers.update);
-    router.delete(`${prefix}/:uuid?/:id`, authenticateToken, handlers.delete);
 };
 
 // Mount routes for all paths
+mountRoutes(app, '/simple-api');
 mountRoutes(app, '/proxy/3006');
 mountRoutes(app, '/proxy/3007');
-mountRoutes(app, '/simple-api');
 mountRoutes(app);
 
 const PORT = process.env.PORT || 3006;

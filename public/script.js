@@ -253,7 +253,7 @@ function setupExamplesSection() {
 // Generate example commands
 function generateExamples() {
     const uuid = getUuidFromUrl() || 'default';
-    const baseUrl = `${window.location.protocol}//${window.location.host}`;
+    const baseUrl = `${window.location.protocol}//${window.location.host}${window.location.pathname.split('/').slice(0, -2).join('/')}`;
     const authToken = 'Bearer uzJtmYh8DrCuAK5td3APLxvYds704hOslXZJd7a';
     
     // Get the path prefix from the current URL

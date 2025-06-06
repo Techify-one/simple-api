@@ -234,8 +234,8 @@ function extractUuidFromUrl(req) {
 const createCrudHandlers = () => ({
     create: async (req, res) => {
         try {
-            const { name, profissao } = req.body;
-            if (!name || !profissao) {
+            const { name, occupation } = req.body;
+            if (!name || !occupation) {
                 return res.status(400).json({ error: 'Name e occupation são obrigatórios' });
             }
 
@@ -250,7 +250,7 @@ const createCrudHandlers = () => ({
             const newRecord = {
                 id: newId,
                 name,
-                profissao,
+                occupation,
                 dataCriacao: now,
                 dataEdicao: now
             };
@@ -274,7 +274,7 @@ const createCrudHandlers = () => ({
             const urlUuid = extractUuidFromUrl(req);
             const uuid = urlUuid || getOrCreateUuid(req, res);
             
-            const { id, name, profissao } = req.query;
+            const { id, name, occupation } = req.query;
             let data = await readUserData(uuid);
             
             // Aplicar filtros se fornecidos
@@ -289,10 +289,10 @@ const createCrudHandlers = () => ({
                 );
             }
             
-            if (profissao) {
-                const profissaoLowerCase = profissao.toLowerCase();
+            if (occupation) {
+                const occupationLowerCase = occupation.toLowerCase();
                 data = data.filter(record => 
-                    record.profissao.toLowerCase().includes(profissaoLowerCase)
+                    record.occupation.toLowerCase().includes(occupationLowerCase)
                 );
             }
             
@@ -306,9 +306,9 @@ const createCrudHandlers = () => ({
     update: async (req, res) => {
         try {
             const { id } = req.params;
-            const { name, profissao } = req.body;
+            const { name, occupation } = req.body;
             
-            if (!name || !profissao) {
+            if (!name || !occupation) {
                 return res.status(400).json({ error: 'Name e occupation são obrigatórios' });
             }
 
@@ -327,7 +327,7 @@ const createCrudHandlers = () => ({
             data[index] = {
                 ...data[index],
                 name,
-                profissao,
+                occupation,
                 dataEdicao: now
             };
 

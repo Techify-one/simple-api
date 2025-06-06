@@ -93,7 +93,7 @@ function updateTable(data) {
         const rowContent = `
             <td>${record.id}</td>
             <td>${record.name}</td>
-            <td>${record.profissao}</td>
+            <td>${record.occupation}</td>
             <td>${formatDate(record.dataCriacao)}</td>
             <td>${formatDate(record.dataEdicao)}</td>
         `;
@@ -265,7 +265,7 @@ function generateExamples() {
         `curl -X POST \\
   -H "Content-Type: application/json" \\
   -H "Authorization: ${authToken}" \\
-  -d '{"name":"Example Name","profissao":"Example Job"}' \\
+  -d '{"name":"Example Name","occupation":"Example Job"}' \\
   ${baseUrl}${pathPrefix}/${uuid}`;
     
     // READ examples with separate copy buttons
@@ -291,20 +291,20 @@ function generateExamples() {
     document.getElementById('readByProfessionExample').textContent = 
         `curl -X GET \\
   -H "Authorization: ${authToken}" \\
-  ${baseUrl}${pathPrefix}/${uuid}?profissao=developer`;
+  ${baseUrl}${pathPrefix}/${uuid}?occupation=developer`;
     
     // Combine multiple filters
     document.getElementById('readCombinedExample').textContent = 
         `curl -X GET \\
   -H "Authorization: ${authToken}" \\
-  ${baseUrl}${pathPrefix}/${uuid}?name=john&profissao=developer`;
+  ${baseUrl}${pathPrefix}/${uuid}?name=john&occupation=developer`;
     
     // UPDATE example
     document.getElementById('updateExample').textContent = 
         `curl -X PUT \\
   -H "Content-Type: application/json" \\
   -H "Authorization: ${authToken}" \\
-  -d '{"name":"Updated Name","profissao":"Updated Job"}' \\
+  -d '{"name":"Updated Name","occupation":"Updated Job"}' \\
   ${baseUrl}${pathPrefix}/${uuid}/1`;
     
     // DELETE example
